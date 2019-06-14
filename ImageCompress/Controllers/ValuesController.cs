@@ -127,6 +127,7 @@ namespace ImageCompress.Controllers
         public void HtmlToPdf(string url)
         {
             WebClient wc = new WebClient();
+
             wc.DownloadFile("http://localhost:91/convert?auth=arachnys-weaver&url=" + url, @"D:\users\somefile.pdf");
         }       
 
