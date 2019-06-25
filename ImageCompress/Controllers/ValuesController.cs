@@ -49,9 +49,10 @@ namespace ImageCompress.Controllers
         }
 
         //[FromForm] string imagePath
-        public ActionResult<List<byte[]>> ImageCompress(string url)
+        public ActionResult ImageCompress(string url)
         {   
             WebClient client = new WebClient();
+            MemoryStream outStream11 = new MemoryStream();
 
             byte[] imageBytes = client.DownloadData(new Uri(url));
             List<byte[]> test = new List<byte[]>();
@@ -92,7 +93,7 @@ namespace ImageCompress.Controllers
                         quality = 70;
                     }
 
-                    MemoryStream outStream11 = new MemoryStream(); 
+                    
                     using (var inStream = new MemoryStream(photoBytes))
                     {
                         using (var outStream = new MemoryStream())
@@ -112,7 +113,7 @@ namespace ImageCompress.Controllers
                     //GC.Collect();
                     //System.IO.File.Delete(filePaths[i]);
                     test.Add(outStream11.ToArray());
-
+                 
                 }
                 GC.Collect();
 
@@ -121,7 +122,11 @@ namespace ImageCompress.Controllers
             {
               
             }
-            return test;
+
+            Stream myStream = outStream11;
+
+            return File(myStream, "application/jpg", "Image.jpg");
+
         }
 
         public void HtmlToPdf(string url)
