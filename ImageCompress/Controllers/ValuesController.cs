@@ -9,6 +9,8 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.Net;
+using TinifyAPI;
+using ImageMagick;
 
 namespace ImageCompress.Controllers
 {
@@ -118,7 +120,7 @@ namespace ImageCompress.Controllers
                 GC.Collect();
 
             }
-            catch (Exception eX)
+            catch (System.Exception eX)
             {
               
             }
@@ -134,7 +136,110 @@ namespace ImageCompress.Controllers
             WebClient wc = new WebClient();
 
             wc.DownloadFile("http://localhost:91/convert?auth=arachnys-weaver&url=" + url, @"D:\users\somefile.pdf");
-        }       
+        }
+
+        public void ImageMagick(double scaleFactor = 1)
+        {
+            //Tinify.Key = "0WgAiL9LFYVpIa8HLRDMdBBM4xNS5wzc";
+            //Tinify.FromFile(@"D:\2\SampleJPGImage_15mbmb.jpg").ToFile(@"D:\2\SampleJPGImage_15mbmb__.jpg").Wait();
+
+            //FileInfo snakewareLogo = new FileInfo(@"C:\Users\gokul.raju\Desktop\Z2.jpg");
+            //File.Copy(@"C:\Users\gokul.raju\Desktop\Z2.jpg", "Z2.jpg", true);
+
+            //Console.WriteLine("Bytes before: " + snakewareLogo.Length);
+
+            //ImageOptimizer optimizer = new ImageOptimizer();
+            //optimizer.Compress(snakewareLogo);
+
+            //snakewareLogo.Refresh();
+            //Console.WriteLine("Bytes after:  " + snakewareLogo.Length);
+            string[] filePaths = Directory.GetFiles(@"D:\IMG", "*.jpg", SearchOption.AllDirectories);
+            foreach (string path in filePaths)
+            {
+                WebClient client = new WebClient();
+                byte[] imageBytes = System.IO.File.ReadAllBytes(path);
+                Stream stream = new MemoryStream(imageBytes);
+                string fileName = path.Split('\\').Last();
+
+                string filePathC = path.Replace(fileName, "") + "\\C\\_" + fileName;
+                string filePathR = path.Replace(fileName, "") + "\\R\\_" + fileName;
+                //if (fileName.Substring(0, 1) != "_")
+                //{
+
+                try
+                {
+                    ReduceImageSize(scaleFactor, stream, filePathR);
+                    compress(System.Drawing.Image.FromStream(stream), 50, filePathC);
+                }
+                catch {
+
+                }
+                //}
+                //else{
+                //    try
+                //    {
+                //        System.IO.File.Delete(path);
+                //    }
+                //    catch { }
+                //}
+            }
+        }
+
+
+        public void ReduceImageSize(double scaleFactor, Stream sourcePath, string targetPath)
+        {
+            try
+            {
+                using (var image = System.Drawing.Image.FromStream(sourcePath))
+                {
+                    var newWidth = (int)(image.Width * scaleFactor);
+                    var newHeight = (int)(image.Height * scaleFactor);
+                    var thumbnailImg = new Bitmap(newWidth, newHeight);
+                    var thumbGraph = Graphics.FromImage(thumbnailImg);
+                    thumbGraph.CompositingQuality = CompositingQuality.HighQuality;
+                    thumbGraph.SmoothingMode = SmoothingMode.HighQuality;
+                    thumbGraph.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                    thumbGraph.PixelOffsetMode = PixelOffsetMode.HighQuality;
+                    var imageRectangle = new Rectangle(0, 0, newWidth, newHeight);
+                    thumbGraph.DrawImage(image, imageRectangle);
+                    thumbnailImg.Save(targetPath, image.RawFormat);
+                }
+            }
+            catch {
+            }
+
+        }
+
+        public void compress(Image sourceImage, int imageQuality, string savePath)
+        {
+            ImageCodecInfo jpegCodec = null;
+
+            //Set quality factor for compression
+            EncoderParameter imageQualitysParameter = new EncoderParameter(
+                        System.Drawing.Imaging.Encoder.Quality, imageQuality);
+
+            //List all avaible codecs (system wide)
+            ImageCodecInfo[] alleCodecs = ImageCodecInfo.GetImageEncoders();
+
+            EncoderParameters codecParameter = new EncoderParameters(1);
+            codecParameter.Param[0] = imageQualitysParameter;
+
+            //Find and choose JPEG codec
+            for (int i = 0; i < alleCodecs.Length; i++)
+            {
+                if (alleCodecs[i].MimeType == "image/jpeg")
+                {
+                    jpegCodec = alleCodecs[i];
+                    break;
+                }
+            }
+
+            //Save compressed image
+            sourceImage.Save(savePath, jpegCodec, codecParameter);
+        }
+
+
+
 
     }
     

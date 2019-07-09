@@ -30,3 +30,4 @@ WORKDIR /app
 COPY --from=publish /app .
 ENTRYPOINT ["dotnet", "ImageCompress.dll"]
 
+
