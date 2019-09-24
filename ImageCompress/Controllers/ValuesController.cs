@@ -135,7 +135,7 @@ namespace ImageCompress.Controllers
         {
             WebClient wc = new WebClient();
 
-            wc.DownloadFile("http://localhost:91/convert?auth=arachnys-weaver&url=" + url, @"D:\users\somefile.pdf");
+            wc.DownloadFile("https://url-to-pdf-api.herokuapp.com/api/render?url=" + url, @"D:\users\somefile.pdf");
         }
 
         public void ImageMagick(double scaleFactor = 1)
